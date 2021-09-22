@@ -26,7 +26,7 @@ void setup() {
 
 void loop() { // Основной цикл
   sensor_DHT11();
-  Button0();
+  //Button0();
   Button1();
 }
 
@@ -71,7 +71,7 @@ void Display1() {
     time = micros();
     lcd.setCursor(0, 0);
     lcd.print(time);
-    Serial.println(time);
+    //Serial.println(time);
     lcd.setCursor(0, 1);
     lcd.print("Display 1");
   }
@@ -80,19 +80,19 @@ void Display1() {
 void Display2() {
   lcd.setCursor(0, 1);
   lcd.print("Display 2");
-  Serial.println("Display 2");
+  //Serial.println("Display 2");
 }
 
 void Display3() {
   lcd.setCursor(0, 1);
   lcd.print("Display 3");
-  Serial.println("Display 3");
+  //Serial.println("Display 3");
 }
 
 void Display4() {
   lcd.setCursor(0, 1);
   lcd.print("Display 4");
-  Serial.println("Display 4");
+  //Serial.println("Display 4");
 }
 
 void Display_test() {
@@ -105,7 +105,7 @@ void Display_test() {
 void Display_off() {
   lcd.setCursor(0, 1);
   lcd.print("Button test");
-  Serial.println("Button test");
+  //Serial.println("Button test");
 }
 
 void Button0() {
@@ -113,6 +113,7 @@ void Button0() {
   btn0.tick();
   if (btn0.isClick()) {
     if (++mode >= 4) mode = 0;
+     Serial.println("Button0 pressed");
     lcd.clear();
   }
 
@@ -125,14 +126,15 @@ void Button0() {
 }
 
 void Button1() {
-  static byte mode = 1;
+  static byte mode1 = 0;
   btn1.tick();
   if (btn1.isClick()) {
-    if (++mode >= 3) mode = 0;
+    if (++mode1 >= 3) mode1 = 0;
+    Serial.println("Button1 pressed");
     lcd.clear();
   }
 
-  switch (mode) {
+  switch (mode1) {
     case 0: Display_test(); break;
     case 1: Display_off(); break;
   }
