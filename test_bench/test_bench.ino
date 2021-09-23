@@ -1,6 +1,6 @@
 #define DHT11_PIN 2     // пин подкючения датчика температуры
-#define BUTTON_0_PIN 4  // кнопка для переключения между дисплеями
-#define BUTTON_1_PIN 7
+#define BUTTON_0 4      // кнопка для переключения между дисплеями
+#define BUTTON_1 8      // кнопка для переключения между дисплеями в обратном порядке
 
 #include <Wire.h>                  // подключаем библиотеку для работы с I2C
 #include <DHT.h>                   // подключаем библиотеку для датчика DHT11
@@ -9,12 +9,12 @@ float DHT11_temp = 0;
 byte DHT11_Hum = 0;
 #include <LiquidCrystal_PCF8574.h> // Подключение библиотеки LiquidCrystal_PCF8574.h для управления дисплеем
 LiquidCrystal_PCF8574 lcd(0x27);   // Вариант для библиотеки PCF8574
-#include <EncButton.h>             // Подключение библиотеки для обработки кнопки
-EncButton<EB_TICK, BUTTON_0_PIN > btn0(INPUT_PULLUP);
-EncButton<EB_TICK, BUTTON_1_PIN > btn1(INPUT_PULLUP);
+#include "GyverButton.h"           // Подключение библиотеки для обработки кнопки
+GButton butt0(BUTTON_0);
+GButton butt1(BUTTON_1);
 
 #include "GyverTimer.h"            // Подключение библиотеки с таймерами
-GTimer secTimer(MS, 500);          // Таймер работающий раз в 500 мс
+GTimer secTimer(MS, 1000);         // Таймер работающий раз в 1000 мс
 
 void setup() {
   Serial.begin(9600);        // подключаем монитор порта
@@ -22,12 +22,15 @@ void setup() {
   lcd.begin(16, 2);          // Экран 16 столбцов на 2 строки
   lcd.setBacklight(255);     // Установка максимальной яркости экрана
 
+  // устанавливаем опрос кнопок на автоматический
+  butt0.setTickMode(AUTO);
+  butt1.setTickMode(AUTO);
+
 }
 
 void loop() { // Основной цикл
   sensor_DHT11();
-  //Button0();
-  Button1();
+  Switch_Display_Buttons();
 }
 
 void sensor_DHT11() {
@@ -66,40 +69,33 @@ void Display0() {
 }
 
 void Display1() {
-  if (secTimer.isReady()) {
-    unsigned long time;
-    time = micros();
-    lcd.setCursor(0, 0);
-    lcd.print(time);
-    //Serial.println(time);
-    lcd.setCursor(0, 1);
-    lcd.print("Display 1");
-  }
+  lcd.setCursor(0, 1);
+  lcd.print("Display 1");
+  Serial.println("Display 1");
 }
 
 void Display2() {
   lcd.setCursor(0, 1);
   lcd.print("Display 2");
-  //Serial.println("Display 2");
+  Serial.println("Display 2");
 }
 
 void Display3() {
   lcd.setCursor(0, 1);
   lcd.print("Display 3");
-  //Serial.println("Display 3");
+  Serial.println("Display 3");
 }
 
 void Display4() {
   lcd.setCursor(0, 1);
   lcd.print("Display 4");
-  //Serial.println("Display 4");
+  Serial.println("Display 4");
 }
 
-void Display_test() {
-  lcd.setCursor(1, 1);
-  lcd.print("Button 2");
-  Serial.println("Button 2");
-
+void Display5() {
+  lcd.setCursor(0, 1);
+  lcd.print("Display 5");
+  Serial.println("Display 5");
 }
 
 void Display_off() {
@@ -108,13 +104,27 @@ void Display_off() {
   //Serial.println("Button test");
 }
 
-void Button0() {
+void   Switch_Display_Buttons() {
   static byte mode = 0;
-  btn0.tick();
-  if (btn0.isClick()) {
-    if (++mode >= 4) mode = 0;
-     Serial.println("Button0 pressed");
+  if (butt0.isClick()) {
+    if (++mode >= 6) mode = 0;
+    Serial.println("Button0 pressed");
     lcd.clear();
+  }
+  if (butt1.isClick()) {
+    if (--mode >= 6) mode = 5;
+    Serial.println("Button1 pressed");
+    lcd.clear();
+  }
+  if (butt1.isSingle()) {
+    Serial.println("Single");       // проверка на один клик
+  }
+  if (butt1.isDouble()) {
+    Serial.println("Double");       // проверка на двойной клик
+
+  }
+  if (butt1.isTriple()) {
+    Serial.println("Triple");       // проверка на тройной клик
   }
 
   switch (mode) {
@@ -122,20 +132,7 @@ void Button0() {
     case 1: Display1(); break;
     case 2: Display2(); break;
     case 3: Display3(); break;
-  }
-}
-
-void Button1() {
-  static byte mode1 = 0;
-  btn1.tick();
-  if (btn1.isClick()) {
-    if (++mode1 >= 3) mode1 = 0;
-    Serial.println("Button1 pressed");
-    lcd.clear();
-  }
-
-  switch (mode1) {
-    case 0: Display_test(); break;
-    case 1: Display_off(); break;
+    case 4: Display4(); break;
+    case 5: Display5(); break;
   }
 }
