@@ -5,8 +5,9 @@
 #include <Wire.h>                  // подключаем библиотеку для работы с I2C
 #include <DHT.h>                   // подключаем библиотеку для датчика DHT11
 DHT dht(DHT11_PIN, DHT11);         // сообщаем на каком порту и какой датчик будет работать
-float DHT11_temp = 0;
-byte DHT11_Hum = 0;
+float DHT11_temp;
+float DHT11_Hum;
+// экран использует A5 для SLC, A4 SDA
 #include <LiquidCrystal_PCF8574.h> // Подключение библиотеки LiquidCrystal_PCF8574.h для управления дисплеем
 LiquidCrystal_PCF8574 lcd(0x27);   // Вариант для библиотеки PCF8574
 #include "GyverButton.h"           // Подключение библиотеки для обработки кнопки
@@ -34,13 +35,17 @@ void loop() { // Основной цикл
 }
 
 void sensor_DHT11() {
+  if ( isnan(DHT11_temp) || isnan(DHT11_Hum)) { // Проверка работоспособности датчика
+    Serial.println("DHT11 ERROR");
+    return;
+  }
   if (secTimer.isReady()) {
     DHT11_temp = dht.readTemperature(); // Считываем температуру (t)
     DHT11_Hum = dht.readHumidity();     // Cчитываем  влажность (h)
   }
 }
 
-void Display0() {
+void DHT11_info() {
 
   // выводим температуру (t) и влажность (h) на монитор порта (дебаг) и на дисплей
   /*
@@ -116,19 +121,10 @@ void   Switch_Display_Buttons() {
     Serial.println("Button1 pressed");
     lcd.clear();
   }
-  if (butt1.isSingle()) {
-    Serial.println("Single");       // проверка на один клик
-  }
-  if (butt1.isDouble()) {
-    Serial.println("Double");       // проверка на двойной клик
 
-  }
-  if (butt1.isTriple()) {
-    Serial.println("Triple");       // проверка на тройной клик
-  }
 
   switch (mode) {
-    case 0: Display0(); break;
+    case 0: DHT11_info(); break;
     case 1: Display1(); break;
     case 2: Display2(); break;
     case 3: Display3(); break;
