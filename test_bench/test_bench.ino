@@ -7,7 +7,6 @@
 DHT dht(DHT11_PIN, DHT11);         // сообщаем на каком порту и какой датчик будет работать
 float DHT11_temp;
 float DHT11_Hum;
-// экран использует A5 для SLC, A4 SDA
 #include <LiquidCrystal_PCF8574.h> // Подключение библиотеки LiquidCrystal_PCF8574.h для управления дисплеем
 LiquidCrystal_PCF8574 lcd(0x27);   // Вариант для библиотеки PCF8574
 #include "GyverButton.h"           // Подключение библиотеки для обработки кнопки
@@ -35,11 +34,11 @@ void loop() { // Основной цикл
 }
 
 void sensor_DHT11() {
-  if ( isnan(DHT11_temp) || isnan(DHT11_Hum)) { // Проверка работоспособности датчика
-    Serial.println("DHT11 ERROR");
-    return;
-  }
   if (secTimer.isReady()) {
+    if ( isnan(DHT11_temp) || isnan(DHT11_Hum)) { // Проверка работоспособности датчика
+      Serial.println("DHT11 ERROR");
+    }
+
     DHT11_temp = dht.readTemperature(); // Считываем температуру (t)
     DHT11_Hum = dht.readHumidity();     // Cчитываем  влажность (h)
   }
@@ -70,7 +69,7 @@ void DHT11_info() {
   lcd.setCursor(10, 0);
   lcd.print(DHT11_temp, 1); // показать только 1 знак после зпт
   lcd.setCursor(10, 1);
-  lcd.print(DHT11_Hum);
+  lcd.print(DHT11_Hum, 1);
 }
 
 void Display1() {
@@ -121,7 +120,6 @@ void   Switch_Display_Buttons() {
     Serial.println("Button1 pressed");
     lcd.clear();
   }
-
 
   switch (mode) {
     case 0: DHT11_info(); break;
