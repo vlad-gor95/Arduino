@@ -2,9 +2,12 @@
 #define BUTTON_0 4      // кнопка для переключения между дисплеями
 #define BUTTON_1 8      // кнопка для переключения между дисплеями в обратном порядке
 
+#define lcd00 lcd.setCursor(0, 0);
+#define lcd01 lcd.setCursor(0, 1);
+
 #include <Wire.h>                  // подключаем библиотеку для работы с I2C
 #include <DHT.h>                   // подключаем библиотеку для датчика DHT11
-DHT dht(DHT11_PIN, DHT11);         // сообщаем на каком порту и какой датчик будет работать
+DHT dht11(DHT11_PIN, DHT11);         // сообщаем на каком порту и какой датчик будет работать
 float DHT11_temp;
 float DHT11_Hum;
 #include <LiquidCrystal_PCF8574.h> // Подключение библиотеки LiquidCrystal_PCF8574.h для управления дисплеем
@@ -18,7 +21,7 @@ GTimer secTimer(MS, 1000);         // Таймер работающий раз �
 
 void setup() {
   Serial.begin(9600);        // подключаем монитор порта
-  dht.begin();               // запускаем датчик DHT11
+  dht11.begin();               // запускаем датчик DHT11
   lcd.begin(16, 2);          // Экран 16 столбцов на 2 строки
   lcd.setBacklight(255);     // Установка максимальной яркости экрана
 
@@ -38,9 +41,8 @@ void sensor_DHT11() {
     if ( isnan(DHT11_temp) || isnan(DHT11_Hum)) { // Проверка работоспособности датчика
       Serial.println("DHT11 ERROR");
     }
-
-    DHT11_temp = dht.readTemperature(); // Считываем температуру (t)
-    DHT11_Hum = dht.readHumidity();     // Cчитываем  влажность (h)
+    DHT11_temp = dht11.readTemperature(); // Считываем температуру (t)
+    DHT11_Hum = dht11.readHumidity();     // Cчитываем  влажность (h)
   }
 }
 
@@ -58,9 +60,9 @@ void DHT11_info() {
   */
 
   //"Рисуем" интерфейс
-  lcd.setCursor(0, 0);
+  lcd00;
   lcd.print("Temp:");
-  lcd.setCursor(0, 1);
+  lcd01;
   lcd.print("Humidity:");
   lcd.setCursor(15, 0);
   lcd.print("C");
@@ -73,42 +75,42 @@ void DHT11_info() {
 }
 
 void Display1() {
-  lcd.setCursor(0, 1);
+  lcd01;
   lcd.print("Display 1");
   Serial.println("Display 1");
 }
 
 void Display2() {
-  lcd.setCursor(0, 1);
+  lcd01;
   lcd.print("Display 2");
   Serial.println("Display 2");
 }
 
 void Display3() {
-  lcd.setCursor(0, 1);
+  lcd01;
   lcd.print("Display 3");
   Serial.println("Display 3");
 }
 
 void Display4() {
-  lcd.setCursor(0, 1);
+  lcd01;
   lcd.print("Display 4");
   Serial.println("Display 4");
 }
 
 void Display5() {
-  lcd.setCursor(0, 1);
+  lcd01;
   lcd.print("Display 5");
   Serial.println("Display 5");
 }
 
 void Display_off() {
-  lcd.setCursor(0, 1);
+  lcd01;
   lcd.print("Button test");
   //Serial.println("Button test");
 }
 
-void   Switch_Display_Buttons() {
+void Switch_Display_Buttons() {
   static byte mode = 0;
   if (butt0.isClick()) {
     if (++mode >= 6) mode = 0;
