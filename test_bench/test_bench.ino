@@ -73,7 +73,7 @@ void DHT22_info() {
   getDHTFunc(DHT22_temp, DHT22_Hum);
 }
 
-float getDHTFunc (float DHT_Temp, float DHT_Hum) {
+void getDHTFunc (float DHT_Temp, float DHT_Hum) {
   lcd00;
   lcd.print("Temp:");
   lcd01;
