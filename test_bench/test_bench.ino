@@ -1,65 +1,79 @@
-#define DHT11_PIN 2     // пин подкючения датчика температуры
-#define BUTTON_0 4      // кнопка для переключения между дисплеями
-#define BUTTON_1 8      // кнопка для переключения между дисплеями в обратном порядке
+#include <Wire.h>        // подключаем библиотеку для работы с I2C
+#include <DHT.h>         // подключаем библиотеку для датчика DHT11
+
+#define DHTTYPE11 DHT11  // тип датчика DHT11
+#define DHTTYPE22 DHT22  // тип датчика DHT22
+
+#define DHT11_PIN 2      // пин подкючения датчика температуры DHT11
+#define DHT22_PIN 5      // пин подкючения датчика температуры DHT22
+
+DHT dht11(DHT11_PIN, DHTTYPE11); // сообщаем на каком порту и DHT11 будет работать
+float DHT11_temp;
+float DHT11_Hum;
+DHT dht22(DHT22_PIN, DHTTYPE22); // сообщаем на каком порту и DHT22 будет работать
+float DHT22_temp;
+float DHT22_Hum;
+
+#include <LiquidCrystal_PCF8574.h> // Подключение библиотеки LiquidCrystal_PCF8574.h для управления дисплеем
+LiquidCrystal_PCF8574 lcd(0x27);   // Вариант для библиотеки PCF8574
 
 #define lcd00 lcd.setCursor(0, 0);
 #define lcd01 lcd.setCursor(0, 1);
 
-#include <Wire.h>                  // подключаем библиотеку для работы с I2C
-#include <DHT.h>                   // подключаем библиотеку для датчика DHT11
-DHT dht11(DHT11_PIN, DHT11);         // сообщаем на каком порту и какой датчик будет работать
-float DHT11_temp;
-float DHT11_Hum;
-#include <LiquidCrystal_PCF8574.h> // Подключение библиотеки LiquidCrystal_PCF8574.h для управления дисплеем
-LiquidCrystal_PCF8574 lcd(0x27);   // Вариант для библиотеки PCF8574
 #include "GyverButton.h"           // Подключение библиотеки для обработки кнопки
+#define BUTTON_0 4       // кнопка для переключения между дисплеями
+#define BUTTON_1 8       // кнопка для переключения между дисплеями в обратном порядке
 GButton butt0(BUTTON_0);
 GButton butt1(BUTTON_1);
 
 #include "GyverTimer.h"            // Подключение библиотеки с таймерами
 GTimer secTimer(MS, 1000);         // Таймер работающий раз в 1000 мс
+GTimer Timer(MS, 2000);         // Таймер работающий раз в 1000 мс
 
 void setup() {
-  Serial.begin(9600);        // подключаем монитор порта
+  Serial.begin(9600);          // подключаем монитор порта
   dht11.begin();               // запускаем датчик DHT11
-  lcd.begin(16, 2);          // Экран 16 столбцов на 2 строки
-  lcd.setBacklight(255);     // Установка максимальной яркости экрана
+  dht22.begin();               // запускаем датчик DHT22
+  lcd.begin(16, 2);            // Экран 16 столбцов на 2 строки
+  lcd.setBacklight(255);       // Установка максимальной яркости экрана
 
   // устанавливаем опрос кнопок на автоматический
   butt0.setTickMode(AUTO);
   butt1.setTickMode(AUTO);
-
 }
 
 void loop() { // Основной цикл
+  sensor_DHT22();
   sensor_DHT11();
+
   Switch_Display_Buttons();
 }
 
 void sensor_DHT11() {
-  if (secTimer.isReady()) {
-    if ( isnan(DHT11_temp) || isnan(DHT11_Hum)) { // Проверка работоспособности датчика
-      Serial.println("DHT11 ERROR");
-    }
-    DHT11_temp = dht11.readTemperature(); // Считываем температуру (t)
-    DHT11_Hum = dht11.readHumidity();     // Cчитываем  влажность (h)
+  if ( isnan(DHT11_temp) || isnan(DHT11_Hum)) { // Проверка работоспособности датчика
+    Serial.println("DHT11 ERROR");
   }
+  DHT11_temp = dht11.readTemperature(); // Считываем температуру (t)
+  DHT11_Hum = dht11.readHumidity();     // Cчитываем  влажность (h)
+}
+
+void sensor_DHT22() {
+  if ( isnan(DHT22_temp) || isnan(DHT22_Hum)) { // Проверка работоспособности датчика
+    Serial.println("DHT22 ERROR");
+  }
+  DHT22_temp = dht22.readTemperature(); // Считываем температуру (t)
+  DHT22_Hum = dht22.readHumidity();     // Cчитываем  влажность (h)
 }
 
 void DHT11_info() {
+  getDHTFunc(DHT11_temp, DHT11_Hum);
+}
 
-  // выводим температуру (t) и влажность (h) на монитор порта (дебаг) и на дисплей
-  /*
-    Serial.print("Humidity: ");
-    Serial.println(DHT11_Hum);
-    Serial.print("Temperature: ");
-    Serial.println(DHT11_temp);
-    //lcd.setCursor(0, 1);
-    // lcd.print("Display 0");
-    Serial.println("Display 0");
-  */
+void DHT22_info() {
+  getDHTFunc(DHT22_temp, DHT22_Hum);
+}
 
-  //"Рисуем" интерфейс
+float getDHTFunc (float DHT_Temp, float DHT_Hum) {
   lcd00;
   lcd.print("Temp:");
   lcd01;
@@ -69,9 +83,9 @@ void DHT11_info() {
   lcd.setCursor(15, 1);
   lcd.print("%");
   lcd.setCursor(10, 0);
-  lcd.print(DHT11_temp, 1); // показать только 1 знак после зпт
+  lcd.print(DHT_Temp, 1); // показать только 1 знак после зпт
   lcd.setCursor(10, 1);
-  lcd.print(DHT11_Hum, 1);
+  lcd.print(DHT_Hum, 1);
 }
 
 void Display1() {
@@ -125,7 +139,7 @@ void Switch_Display_Buttons() {
 
   switch (mode) {
     case 0: DHT11_info(); break;
-    case 1: Display1(); break;
+    case 1: DHT22_info(); break;
     case 2: Display2(); break;
     case 3: Display3(); break;
     case 4: Display4(); break;
