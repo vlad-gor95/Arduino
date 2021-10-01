@@ -66,14 +66,14 @@ void sensor_DHT22() {
 }
 
 void DHT11_info() {
-  getDHTFunc(DHT11_temp, DHT11_Hum);
+  showDHTDATA (DHT11_temp, DHT11_Hum);
 }
 
 void DHT22_info() {
-  getDHTFunc(DHT22_temp, DHT22_Hum);
+  showDHTDATA(DHT22_temp, DHT22_Hum);
 }
 
-void getDHTFunc (float DHT_Temp, float DHT_Hum) {
+void showDHTDATA (float DHT_Temp, float DHT_Hum) {
   lcd00;
   lcd.print("Temp:");
   lcd01;
